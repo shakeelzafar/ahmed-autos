@@ -1,0 +1,259 @@
+﻿@using dreport.Models;
+@{
+    autosEntities ctx = new autosEntities();
+    List<autoData> listOfFactors = ctx.autoDatas.Where(x => x.Type == 0).ToList();
+    float B35 = 0;
+    foreach(var v in listOfFactors)
+    {
+        B35 = B35 + (float)v.Value;
+    }
+    int i = 0;
+    Layout = null;
+}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+    <title>DataTables Bootstrap 3 example</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/r/bs-3.3.5/jq-2.1.4,dt-1.10.8/datatables.min.css" />
+
+    <script type="text/javascript" src="https://cdn.datatables.net/r/bs-3.3.5/jqc-1.11.3,dt-1.10.8/datatables.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function () {
+            $('#example').DataTable();
+           
+        });
+    </script>
+
+</head>
+<body>
+    <div class="container" style="width:100%; margin-top:5%">
+       
+        <div style="margin-top:6px; " class="col-lg-12 col-sm-12 col-md-12">
+            <table id="example" class="display " style="float:right" cellspacing="0" width="100%">
+                <thead><tr><th>Key </th><th>Product</th><th>FOB</th><th>QNT</th><th>CD</th><th>ST</th><th>IT</th><th>In Rs. 106 </th><th>Total</th><th>-</th><th>T. Duty </th><th>Duty/Tyre</th><th>T. Cost</th><th>- </th><th>-</th><th>-</th></tr></thead>
+                <tbody>
+
+                    @foreach(var v in ctx.autoDatas.ToList())
+                    {
+                        if(v.Type==1)
+                        { 
+                            i++;
+                            List<String> IDS = new List<String>();
+                            for(int j=0; j<16; j++)
+                            {
+                                String temp = i + "" + j;
+                                IDS.Add(temp);
+                            }
+                            <tr id="@i">
+
+                                <td id="@IDS.ToArray()[0]">@v.Id</td>
+                                <td id="@IDS.ToArray()[1]">@v.Key</td>
+                                <td id="@IDS.ToArray()[2]">@v.Value</td>
+                                <td><input id="@IDS.ToArray()[3]" onchange="calculate(@B35,@i)" style="width:90px" type="text" class="form-control"></td>
+                                <td><input style="width:90px" onchange="calculate(@B35,@i)" type="text" class="form-control" id="@IDS.ToArray()[4]" name="id"></td>
+                                <td><input style="width:90px" onchange="calculate(@B35,@i)" type="text" class="form-control" id="@IDS.ToArray()[5]" name="id"></td>
+                                <td><input style="width:90px" onchange="calculate(@B35,@i)" type="text" class="form-control" id="@IDS.ToArray()[6]" name="id"></td>
+                                <td id="@IDS.ToArray()[7]">0</td>
+                                <td id="@IDS.ToArray()[8]">0</td>
+                                <td id="@IDS.ToArray()[9]">0</td>
+                                <td id="@IDS.ToArray()[10]">0</td>
+                                <td id="@IDS.ToArray()[11]">0</td>
+                                <td id="@IDS.ToArray()[12]">0</td>
+                                <td id="@IDS.ToArray()[13]">0</td>
+                                <td id="@IDS.ToArray()[14]">0</td>
+                                <td id="@IDS.ToArray()[15]">0</td>
+                            </tr>
+                        }
+
+                    }
+                  
+                   
+                </tbody>
+            </table>
+
+
+        </div>
+   
+    </div>
+
+
+    <script type="text/javascript" charset="utf-8">
+        function calculate(B35,size) {
+
+            var rows = document.getElementById("example").rows;
+            //Putting the value in 106 Rate
+            for (i = 1; i <= size; i++) {
+                
+                var fob = rows[i].cells.item(2).textContent;
+                var InRs106 = parseFloat(fob) * 106;
+                var obj = document.getElementById("example").rows[i].cells.item(7);
+                var ID = i + "7";
+                document.getElementById(ID).firstChild.data = InRs106;
+                
+            }
+
+            //Putting the value in Total.
+            var GrandTotal = 0;
+            for (i = 1; i <= size; i++) {
+
+                var InRs106 = rows[i].cells.item(7).textContent;                
+                var ID = i + "3";
+                var inpu = document.getElementById(ID).value;
+               
+                var Total = parseFloat(InRs106) * parseFloat(inpu);
+                GrandTotal = GrandTotal + Total;                    
+                var ID = i + "8";
+                document.getElementById(ID).firstChild.data = Total;
+               
+            }
+            
+            //Putting  the individual value
+            for (i = 1; i <=size; i++) { 
+                var ID = i + "7";                
+                var InRs106 = parseFloat(rows[i].cells.item(7).textContent); 
+                
+                
+                var v2 = parseFloat(B35);
+                var v1 = parseFloat(GrandTotal);
+                var NewResult =v2/v1;                              
+                var finalResult = (NewResult*InRs106) + InRs106;
+               // alert(finalResult);
+                ID = i+"9";
+                finalResult = Math.round(finalResult);
+                document.getElementById(ID).firstChild.data = finalResult;
+            }
+
+
+            //Putting  the T.Duty
+            for (i = 1; i <=size; i++) { 
+                
+                var ID = i + "4";
+                var cd = parseFloat(document.getElementById(ID).value);
+               
+                if(cd>=0)
+                {
+                    ID = i + "5";
+                    var st = parseFloat(document.getElementById(ID).value);
+                    if(st>=0)
+                    {
+                        ID = i + "6";
+                        var it = parseFloat(document.getElementById(ID).value)
+                        if(it>=0)
+                        {
+                            var Total = cd + st + it;
+                
+                            Total = Math.round(Total);
+                            var ID = i + "10";
+                            document.getElementById(ID).firstChild.data = Total;
+                        }
+                    }
+                }
+            }
+
+            //Putting  the T.Duty/Tyre
+            for (i = 1; i <=size; i++) {                 
+                var TDuty = parseFloat(rows[i].cells.item(10).textContent);
+               
+                if(TDuty>=0)
+                {
+                    var ID = i + "3";
+                    var qnt = parseFloat(document.getElementById(ID).value);
+                    if(qnt>0)
+                    {
+                        var dByt = TDuty/qnt;
+                        ID = i + "11";
+                        dByt = Math.round(dByt);
+                        document.getElementById(ID).firstChild.data = dByt;
+                    }
+                }
+            }
+
+            //Putting  the T.Cost
+            for (i = 1; i <=size; i++) {                 
+                var Individual = parseFloat(rows[i].cells.item(9).textContent);
+               
+                if(Individual>=0)
+                {
+                    var Duty = parseFloat(rows[i].cells.item(11).textContent);
+                    if(Duty>=0)
+                    {
+                        var cost = Individual + Duty;
+                        ID = i + "12";
+                        cost = Math.round(cost);
+                        document.getElementById(ID).firstChild.data = cost;
+                    }
+                }
+            }
+
+            //Putting  the Total .Cost
+            for (i = 1; i <=size; i++) {                 
+                var Individual = parseFloat(rows[i].cells.item(12).textContent);
+               
+                if(Individual>=0)
+                {
+                    var ID = i + "3";
+                    var qnt = parseFloat(document.getElementById(ID).value);
+                    if(qnt>=0)
+                    {
+                        var cost = Individual * qnt;
+                        ID = i + "13";
+                        cost = Math.round(cost);
+                        document.getElementById(ID).firstChild.data = cost;
+                    }
+                }
+            }
+
+            
+            //Putting  the Total .Cost
+            for (i = 1; i <=size; i++) {                 
+                var Individual = parseFloat(rows[i].cells.item(12).textContent);
+               
+                if(Individual>=0)
+                {
+                    var Duty = parseFloat(rows[i].cells.item(7).textContent);
+                    if(Duty>=0)
+                    {
+                        var cost = Individual - Duty;
+                        ID = i + "14";
+                        cost = Math.round(cost);
+                        document.getElementById(ID).firstChild.data = cost;
+                    }
+                }
+            }
+
+              
+            //Putting  the Total .Cost
+            for (i = 1; i <=size; i++) {                 
+                var Individual = parseFloat(rows[i].cells.item(14).textContent);
+               
+                if(Individual>=0)
+                {
+                    var Duty = parseFloat(rows[i].cells.item(7).textContent);
+                    if(Duty>=0)
+                    {
+                        var cost = Individual / Duty;
+                        cost = cost % 100
+                        ID = i + "15";
+                        cost = Math.round(cost);
+                        document.getElementById(ID).firstChild.data = cost + "%";
+                    }
+                }
+            }
+
+        }
+
+       
+    </script>
+
+    <script type="text/javascript">
+        // For demo to fit into DataTables site builder...
+        $('#example')
+            .removeClass('display')
+            .addClass('table table-striped table-bordered');
+        
+    </script>
+</body>
+</html>

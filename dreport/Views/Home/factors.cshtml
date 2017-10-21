@@ -1,0 +1,132 @@
+﻿@using dreport.Models;
+@{
+    Layout = null;
+    autosEntities ctx = new autosEntities();
+}
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+
+    <title>DataTables Bootstrap 3 example</title>
+
+    <style>
+        .click a {
+            display: block;
+        }
+
+        </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/r/bs-3.3.5/jq-2.1.4,dt-1.10.8/datatables.min.css" />
+
+    <script type="text/javascript" src="https://cdn.datatables.net/r/bs-3.3.5/jqc-1.11.3,dt-1.10.8/datatables.min.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        $(document).ready(function () {
+            $('#example').DataTable();
+        });
+    </script>
+
+</head>
+<body style="">
+    <div  class="container" style="width:100%; margin-top:5%">
+        <div style="margin-top:6px;margin-left:3% " class="col-lg-7 col-sm-7 col-md-7">
+
+            <table id="example" class="display " style="float:right" cellspacing="0" width="100%">
+                <thead><tr><th>Key </th><th>Factor</th><th>FOB</th><th>Edit</th><th>Delete</th></tr></thead>
+                <tbody>
+                    @foreach (var v in ctx.autoDatas.ToList())
+                    {
+                        if (v.Type == 0) { 
+                            <tr id="@v.Id"><td>@v.Id</td><td>@v.Key</td><td id="11">@v.Value</td><td class="click" onclick="edit(@v.Id)"><a href="#">Edit</a></td><td onclick="deleteFactor(@v.Id)"><a href="#">Delete</a></td></tr>
+                        } 
+                    }
+
+                </tbody>
+            </table>
+
+        </div>
+        <div style="margin-top:6px; " class="col-lg-4 col-sm-4 col-md-4">
+            <h3 id="add">Please Add a new Factor.</h3>
+            <h3 hidden id="update">Please Update this Factor.</h3>
+            <h3 hidden id="deletefactor">Do you want to delete this Factor?</h3>            
+            <form id="form_id" action="../../Home/savefactor" method="Get">
+                <div hidden class="form-group">
+                    <label for="id">ID:</label>
+                    <input type="text" class="form-control" id="id" name="id">
+                </div>
+                <div class="form-group">
+                    <label for="factor">Factor:</label>
+                    <input type="text" required class="form-control" id="factor" name="factor">
+                </div>
+                <div class="form-group">
+                    <label for="value">Value:</label>
+                    <input type="text" required class="form-control" id="value" name="value">
+                </div>
+
+                <button type="submit" id="submit" class="btn btn-default">Submit</button>
+                <button onclick="undo()" type="button" id="cancel" hidden class="btn btn-default">Calcel</button>
+            </form>
+
+        </div>
+    </div>
+
+
+    <script type="text/javascript" charset="utf-8">
+        function edit(id) {
+            //gets table
+            $("#form_id").attr("action", "../../Home/savefactor");
+            var ID = document.getElementById("example").rows.namedItem(id).cells.item(0).innerHTML;
+            var key = document.getElementById("example").rows.namedItem(id).cells.item(1).innerHTML;
+            var value = document.getElementById("example").rows.namedItem(id).cells.item(2).innerHTML;
+
+            document.getElementById('id').value = ID;
+            document.getElementById('factor').value = key;
+            document.getElementById('value').value = value;
+             
+            $("#update").toggle();
+            $("#deletefactor").hide();
+            $("#add").hide();
+            $("#cancel").show();
+        }
+
+        function deleteFactor(id) {
+            //gets table
+            $("#form_id").attr("action", "../../Home/deletefactor");
+
+            var ID = document.getElementById("example").rows.namedItem(id).cells.item(0).innerHTML;
+            var key = document.getElementById("example").rows.namedItem(id).cells.item(1).innerHTML;
+            var value = document.getElementById("example").rows.namedItem(id).cells.item(2).innerHTML;
+
+            document.getElementById('id').value = ID;
+            document.getElementById('factor').value = key;
+            document.getElementById('value').value = value;
+            
+            $("#deletefactor").show();
+            $("#update").hide();
+           $("#add").hide();
+            $("#cancel").show();
+        }
+
+        function undo() {
+
+            $("#form_id").attr("action", "../../Home/savefactor");
+            document.getElementById('id').value = "";
+            document.getElementById('factor').value = "";
+            document.getElementById('value').value = "";
+            
+            
+            $("#deletefactor").hide();
+            $("#update").hide();
+            $("#add").show();
+            $("#cancel").hide();
+        }
+
+    </script>
+
+    <script type="text/javascript">
+        // For demo to fit into DataTables site builder...
+        $('#example')
+            .removeClass('display')
+            .addClass('table table-striped table-bordered');
+    </script>
+</body>
+</html>
